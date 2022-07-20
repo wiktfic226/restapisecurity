@@ -1,5 +1,6 @@
 package pl.fis.restapisecurity.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -7,17 +8,20 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public String getAdmin() {
         return "This is admin!";
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String createAdmin() {
-        return "User created!";
+        return "Admin created!";
     }
 
     @DeleteMapping
-    public String deleteUser() {
-        return "User deleted!";
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String deleteAdmin() {
+        return "Admin deleted!";
     }
 }
