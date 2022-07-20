@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import pl.fis.restapisecurity.enums.Permission;
 import pl.fis.restapisecurity.enums.UserRole;
 
 @Configuration
@@ -31,14 +32,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         PasswordEncoderConfig passwordEncoderConfig = new PasswordEncoderConfig();
         UserDetails user =
                 User.withUsername("user")
-                        .password(passwordEncoderConfig.passwordEncoder().encode("pass"))
-                        .roles(UserRole.USER.name())
+                        .password(passwordEncoderConfig.passwordEncoder().encode("user"))
+                        .authorities(Permission.USER_EDIT.getPermission(), Permission.USER_READ.getPermission())
                         .build();
         UserDetails admin =
                 User.withUsername("admin")
-                        .password(passwordEncoderConfig.passwordEncoder().encode("pass"))
-                        .roles(UserRole.ADMIN.name())
+                        .password(passwordEncoderConfig.passwordEncoder().encode("admin"))
+                        .authorities(Permission.ADMIN.getPermission())
                         .build();
-        return new InMemoryUserDetailsManager(user, admin);
+        UserDetails spectator =
+                User.withUsername("spectator")
+                        .password(passwordEncoderConfig.passwordEncoder().encode("spectator"))
+                        .authorities(Permission.USER_READ.getPermission())
+                        .build();
+        return new InMemoryUserDetailsManager(user, admin, spectator);
     }
 }

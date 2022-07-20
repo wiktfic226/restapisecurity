@@ -9,15 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "api/user")
 public class UserController {
-
     @GetMapping
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasAnyAuthority('user:read', 'admin')")
     public String getUser() {
         return "This is user!";
     }
 
     @PutMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('user:edit', 'admin')")
     public String updateUser() {
         return "User updated!";
     }
