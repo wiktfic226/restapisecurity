@@ -22,18 +22,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
+
+    private final JwtConfig jwtConfig;
+
+    public JwtTokenVerifier(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
-        if(authorizationHeader.isEmpty() || authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        String authorizationHeader = request.getHeader(jwtConfig.getAuthorizationHeader());
+        if(authorizationHeader == null || authorizationHeader.isEmpty() || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
         try {
-            String key = "keykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykeykey";
-            String token = authorizationHeader.replace("Bearer ", "");
+            String token = authorizationHeader.replace(jwtConfig.getTokenPrefix(), "");
             Jws<Claims> claimsJws = Jwts.parser()
-                    .setSigningKey(Keys.hmacShaKeyFor(key.getBytes()))
+                    .setSigningKey(jwtConfig.getSecretKey())
                     .parseClaimsJws(token);
             Claims body = claimsJws.getBody();
             String username = body.getSubject();

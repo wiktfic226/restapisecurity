@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import pl.fis.restapisecurity.enums.Permission;
+import pl.fis.restapisecurity.jwt.JwtConfig;
 import pl.fis.restapisecurity.jwt.JwtTokenVerifier;
 import pl.fis.restapisecurity.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 
@@ -18,17 +19,26 @@ import pl.fis.restapisecurity.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final JwtConfig jwtConfig;
+
+    public SecurityConfig(JwtConfig jwtConfig) {
+        this.jwtConfig = jwtConfig;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .cors().and().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
-                .addFilterAfter(new JwtTokenVerifier(), JwtUsernameAndPasswordAuthenticationFilter.class)
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig))
+                .addFilterAfter(new JwtTokenVerifier(jwtConfig), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest()
+                .authenticated()
+                .and()
+                .httpBasic();
     }
 
     @Bean
